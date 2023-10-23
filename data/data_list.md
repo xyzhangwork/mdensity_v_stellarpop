@@ -1,1 +1,1 @@
-- stacked_spec.fits: stacked individual 
+- stacked_spec.fits: stacked individual -- upload to dropbox & add link
