@@ -1,2 +1,6 @@
 ../data_lfs/SGA-2020.fits filter=lfs diff=lfs merge=lfs -text
 ../data_lfs/stacked_smooth_sigma300_mask_new2.fits filter=lfs diff=lfs merge=lfs -text
+stacked_smooth_sigma300_mask_new2.fits filter=lfs diff=lfs merge=lfs -text
+SGA-2020.fits filter=lfs diff=lfs merge=lfs -text
+data/stacked_smooth_sigma300_mask_new2.fits filter=lfs diff=lfs merge=lfs -text
+data/SGA-2020.fits filter=lfs diff=lfs merge=lfs -text
