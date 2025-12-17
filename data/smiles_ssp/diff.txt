@@ -1,0 +1,23 @@
+diff --git a/opt/local/etc/macports/macports.conf.default b/opt/local/etc/macports/macports.conf
+index caf971b..85d6159 100644
+--- a/opt/local/etc/macports/macports.conf.default
++++ b/opt/local/etc/macports/macports.conf
+@@ -61,7 +61,7 @@ variants_conf       	/opt/local/etc/macports/variants.conf
+ # - Mac OS X 10.5 and earlier: "ppc" on PowerPC, otherwise "i386".
+ # - Mac OS X 10.6 - 10.15: "x86_64" on 64-bit Intel, otherwise "i386".
+ # - macOS 11 and later: "arm64" on Apple Silicon, otherwise "x86_64".
+-#build_arch          	x86_64
++build_arch          	x86_64
+ 
+ # Space-delimited list of CPU architectures to target when building
+ # universal. Defaults to "i386 ppc" on Mac OS X 10.5 and earlier,
+@@ -76,8 +76,7 @@ variants_conf       	/opt/local/etc/macports/variants.conf
+ # must exist in one of the directories in binpath.
+ #configureccache     	no
+ 
+-# Directory for ccache's cached compiler output. To prevent sandbox
+-# violation errors, the path must contain no symlinks.
++# Directory for ccache's cached compiler output.
+ #ccache_dir          	/opt/local/var/macports/build/.ccache
+ 
+ # Maximum size of files stored in ccache's cache. Append "G", "M", or
