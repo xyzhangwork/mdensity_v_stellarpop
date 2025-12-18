@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: Zhang
+    given-names: Xiaoya
+    orcid: https://orcid.org/0009-0003-2586-2694
+title: "MaNGA Stellar Halo Setllar Population"
+version: 2.0.4
+identifiers:
+  - type: doi
+    value: 
+date-released: 2024-06-17
