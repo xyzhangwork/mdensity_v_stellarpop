@@ -134,7 +134,7 @@ def smoothspec(wave, spec, resolution=None, outwave=None,
         Rsigma = None
         R = None
         width = sigma
-        assert np.size(sigma) == 1, "`resolution` must be scalar for `smoothtype`='lambda'"
+        #assert np.size(sigma) == 1, "`resolution` must be scalar for `smoothtype`='lambda'"
 
     elif smoothtype == 'lsf':
         linear = True

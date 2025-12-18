@@ -6,8 +6,6 @@ from mangadap.config import manga, defaults
 from mangadap.datacube import MaNGADataCube
 from mangadap.proc.spectralstack import SpectralStack
 from unred_curve import ccm_unred
-import os
-from astropy.table import Table
 import astropy.cosmology as cosmology
 
 
@@ -38,15 +36,12 @@ def get_redshift(plate, ifu, drpall_file=None):
 
 
 C = astropy.constants.c.to('km/s').value
-sga_mass = fits.open('sga_mass_new.fits')
+sga_mass = fits.open('/Volumes/ZXYwork/new_stack/sga_mass_new_28mag.fits')
 masking = fits.open('masking.fits')
-parameters = fits.open('parameters_spx2_max_reff2.fits')
-
+parameters = fits.open('parameters_reff2.fits')
+gals=parameters[1].data['plateifu']
 specstack = SpectralStack()
 
-gals = parameters[1].data['plateifu']
-stacked = fits.open('stacked_smooth_sigma300_mask.fits')
-plateifus = stacked['info'].data['plateifu']
 
 size = len(gals)
 wave_size = 4563
@@ -69,8 +64,8 @@ std_gals_in, std_gals_mid, std_gals_out = np.ma.zeros((size, wave_size)), \
 waves_tmp = []
 redshifts = []
 drpver = 'v3_1_1'
-dprall_path = defaults.Path('/scratch/shared_data/manga/')
-drpall_file = dprall_path / f'drpall-{drpver}.fits'
+indices, indices_err = np.zeros((2, size)), np.zeros((2, size))
+fuck_counts = 0
 snrs = []
 cats = []
 fail_cat = []
@@ -78,24 +73,28 @@ cosm = cosmology.FlatLambdaCDM(70, 0.3, 2.725, Ob0=0.046)
 r_median = [[], [], []]
 snr_median = [[], [], []]
 reffs=[]
-for i, gal in enumerate(plateifus):
+drpall = fits.getdata('drpall-v3_1_1.fits', 1)
+_,_,idx_z=np.intersect1d(gals,drpall['plateifu'],return_indices=True)
+for i, gal in enumerate(gals):
+
+    # print(i, gal)
     plate = gal[0:gal.find('-')]
     ifu = gal[gal.find('-') + 1:]
-    maps_path = 'maps path'
-    logs_path = 'logcube path'
+    maps_path='maps path'
+    logs_path='logcub path'
     idx0 = np.where(sga_mass[1].data['plateifu'] == gal)[0]
-    directory_path = defaults.Path(logs_path)
-
-    z0 = get_redshift(plate, ifu, drpall_file)
-    redshifts.append(z0)
+    z0=drpall['z'][idx_z[i]]
+    redshifts.append(drpall['z'][idx_z[i]])
     spx = fits.open(maps_path + 'manga-' + str(plate) + '-' + str(ifu) + '-MAPS-VOR10-MILESHC-MASTARSSP.fits.gz')
-    cube = MaNGADataCube.from_plateifu(plate, ifu, directory_path=directory_path)  # / 'test')
+    cube = MaNGADataCube.from_plateifu(plate, ifu, directory_path=logs_path)  # / 'test')
     if cube.fluxhdr['NAXIS1'] != spx[1].header['NAXIS1']:
         flux_gals_in[i] = np.full(len(flux_gals_in[i]), np.nan)
         flux_gals_mid[i] = np.full(len(flux_gals_mid[i]), np.nan)
         flux_gals_out[i] = np.full(len(flux_gals_out[i]), np.nan)
         cats.append(gal)
         fail_cat.append(gal)
+        fuck_counts += 1
+        print('size no match ', gal)
         continue
     ebv = spx[0].header['EBVGAL']
     ba = sga_mass[1].data['ba'][idx0]
@@ -124,6 +123,8 @@ for i, gal in enumerate(plateifus):
     d_a = cosm.angular_diameter_distance(z0).to('kpc').value
     d_u = (d_a * np.pi / (3600 * 180))
     A = A * (d_a * np.pi / (3600 * 180))
+    A[np.isnan(spx['SPX_SNR'].data)] = np.nan
+
     bins_in = A <= reff * 0.5
     bins_out = A >= 1 * reff
     bins_mid = (A >= reff * 0.5) & (A <= reff)
@@ -133,8 +134,16 @@ for i, gal in enumerate(plateifus):
     bining[bins_out] = 3
     bining[~(spx['SPX_SNR'].data >= 2)] = -1
     bining[spx['STELLAR_VEL_MASK'].data >= int(2 ** 30)] = -1
+    mask_snr = spx['SPX_SNR'].data > 2
+
     if masking['info'].data['plateifu'].__contains__(gal):
         bining[masking[gal].data != 0] = -1
+    if masking['info'].data['plateifu'].__contains__(gal):
+        mask_snr = mask_snr & (masking[gal].data == 0)
+    if np.nansum(((bining == 1) & mask_snr) * 1) < 20 or np.nansum(((bining == 2) & mask_snr) * 1) < 20 or np.nansum(
+            ((bining == 3) & mask_snr) * 1) < 20:
+        print('###########################\n',gal,'\n###########################\n')
+
     r_median[0].append(np.nanmedian(A[bining == 1]))
     r_median[1].append(np.nanmedian(A[bining == 2]))
     r_median[2].append(np.nanmedian(A[bining == 3]))
@@ -143,14 +152,7 @@ for i, gal in enumerate(plateifus):
     snr_median[2].append(np.nanmedian(spx['SPX_SNR'].data[bining == 3]))
     reffs.append(reff)
 
-    if np.nansum(1 * (bining == 2)) <= 1 or np.nansum(1 * (bining == 3)) <= 1 or np.nansum(1 * (bining == 1)) <= 1:
-        flux_gals_in[i] = np.full(len(flux_gals_in[i]), np.nan)
-        flux_gals_mid[i] = np.full(len(flux_gals_mid[i]), np.nan)
-        flux_gals_out[i] = np.full(len(flux_gals_out[i]), np.nan)
-        cats.append(gal)
-        fail_cat.append(gal)
-        continue
-    vel = spx['STELLAR_VEL'].data
+    vel = spx['STELLAR_VEL'].data.T
     z = vel / astropy.constants.c.to('km/s').value
     pars = {'operation': 'mean', 'register': True, 'cz': astropy.constants.c.to('km/s').value * z.flatten(),
             'covar_mode': None, 'covar_par': None}
@@ -159,7 +161,7 @@ for i, gal in enumerate(plateifus):
     sres = cube.copy_to_array(attr='sres')
     covar = SpectralStack.build_covariance_data(cube, pars['covar_mode'], pars['covar_par'])
 
-    r_flux = specstack.stack(cube.wave, flux, operation=pars['operation'], binid=bining.flatten(), ivar=ivar,
+    r_flux = specstack.stack(cube.wave, flux, operation=pars['operation'], binid=(bining.T).flatten(), ivar=ivar,
                              sres=sres, cz=pars['cz'],
                              log=True, covariance_mode=pars['covar_mode'], covar=covar, keep_range=True)
     flux_ = ccm_unred(r_flux[0], ebv, flux=r_flux[1].data)
@@ -255,11 +257,11 @@ for i in range(len(cats)):
     in_std_tmp[j] = 1 / np.sqrt(_std_in.data[i])
     mid_std_tmp[j] = 1 / np.sqrt(_std_mid.data[i])
     out_std_tmp[j] = 1 / np.sqrt(_std_out.data[i])
-
+#
     cats_tmp.append(cats[i])
     j += 1
-plateifus = fits.Column(name='plateifu', array=np.array(cats_tmp), format='32A')
-cols = fits.ColDefs([plateifus])
+plateifus_hdu = fits.Column(name='plateifu', array=np.array(cats), format='32A')
+cols = fits.ColDefs([plateifus_hdu])
 pltifu = fits.BinTableHDU.from_columns(cols, name='info')
 
 f_in = fits.ImageHDU(in_tmp, name='flux_in')

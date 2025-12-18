@@ -2,12 +2,12 @@ import astropy.io.fits as fits
 import numpy as np
 import astropy.constants
 from smoothing import smoothspec
+import sys
 
 if __name__ == '__main__':
-    file_path = '/home/xiaoya/sample_select/'
-    smoothed_spec = fits.open(file_path + 'stacked_sigfix_mask.fits')
+    smoothed_spec = fits.open('./data/stacked_sigfix_mask.fits')
     C = astropy.constants.c.to('km/s').value
-    stacked = fits.open(file_path + 'stacked_spec.fits')
+    stacked = fits.open('./data/stacked_spec.fits')
     flux_in, flux_mid, flux_out = [], [], []
     ivar_in, ivar_mid, ivar_out = [], [], []
     sres_in, sres_mid, sres_out = [], [], []
@@ -45,9 +45,6 @@ if __name__ == '__main__':
         error = np.copy(1 / np.sqrt(i_in[j]))
         std = np.copy(s_in[j])
         sres = np.copy(r_in[j])
-        # spectra[mask_in==0]=np.nan
-        # error[mask_in==0] = np.nan
-        # std[mask_in==0] = np.nan
 
         smooth_spectra = smoothspec(wave, spectra, resolution=target_sigma, inres=C / (2.355 * sres), outwave=wave,
                                     fftsmooth=False, smoothtype='vel')
@@ -67,9 +64,6 @@ if __name__ == '__main__':
         error = np.copy(1 / np.sqrt(i_mid[j]))
         std = np.copy(s_mid[j])
         sres = np.copy(r_mid[j])
-        # spectra[mask_mid==0]=np.nan
-        # error[mask_mid==0] = np.nan
-        # std[mask_mid==0] = np.nan
 
         smooth_spectra = smoothspec(wave, spectra, resolution=target_sigma, inres=C / (2.355 * sres), outwave=wave,
                                     fftsmooth=False)
@@ -89,9 +83,6 @@ if __name__ == '__main__':
         error = np.copy(1 / np.sqrt(i_out[j]))
         std = np.copy(s_out[j])
         sres = np.copy(r_out[j])
-        # spectra[mask_out==0]=np.nan
-        # error[mask_out==0] = np.nan
-        # std[mask_out==0] = np.nan
 
         smooth_spectra = smoothspec(wave, spectra, resolution=target_sigma, inres=C / (2.355 * sres), outwave=wave,
                                     fftsmooth=False)

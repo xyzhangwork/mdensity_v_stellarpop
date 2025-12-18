@@ -40,51 +40,10 @@ def filter_healpix_mask(mask_hp, cat, ra='ra', dec='dec', verbose=True):
 
 
 if __name__ == "__main__":
-    # test = 'https://www.legacysurvey.org/viewer/fits-cutout?ra=185.8210&dec=13.0487&pixscale=0.5&layer=ls-dr9&size=70'
-    url0 = "https://www.legacysurvey.org/viewer/fits-cutout?ra="
-    url1 = "&dec="
-    url2 = "&pixscale=0.5&layer=decals-dr7&size=100"
+    file_drpall = './data/drpall-v3_1_1.fits'
+    drpall = fits.getdata('./data/drpall-v3_1_1.fits', 1)
 
-    hsc_mask = fits.open('s20a_fdfc_hp_contarea_izy-gt-5.fits')
-
-    file_drpall = '/home/xiaoya/sample_select/drpall-v3_1_1.fits'
-    drpall = fits.getdata('/Users/evrinezhang/Desktop/drpall-v3_1_1.fits', 1)
-    """
-
-    '''
-    MaNGA v. DECaLS
-    '''
-    plateifu, objra, objdec = [], [], []
-    n=0
-    mask=(drpall['objdec']>30)|(drpall['objdec']<-30)
-    for manga_info in drpall[mask]:
-        if n>10:
-            break
-        ra = manga_info['objra']
-        dec = manga_info['objdec']
-        url = url0 + str(round(ra, 4)) + url1 + str(round(dec, 4)) + url2
-        response = requests.head(url)
-        print(manga_info['plateifu'])
-        if response.status_code == 200:
-            plateifu.append(manga_info['plateifu'])
-            objra.append(manga_info['objra'])
-            objdec.append(manga_info['objdec'])
-            print(manga_info['objdec'], manga_info['objra'])
-            n += 1
-    #t = Table([plateifu, objra, objdec], names=['plateifu', 'objra', 'objdec'])
-    #t.write('manga_decals_ds9.fits', overwrite=True)
-
-    '''
-    MaNGA v. HSC
-    '''
-    cat_manga_hsc = filter_healpix_mask(hsc_mask, drpall, ra='objra', dec='objdec')
-    # manga_decals_ds9.append([manga_info['plateifu'], manga_info['objra'], manga_info['objdec']])
-    t = Table([cat_manga_hsc['plateifu'], cat_manga_hsc['objra'], cat_manga_hsc['objdec']],
-              names=['plateifu', 'objra', 'objdec'])
-    t.write('manga_hsc.fits', overwrite=True)
-    """
-
-    sga = fits.getdata('/Users/evrinezhang/Desktop/SGA-2020.fits', 1)
+    sga = fits.getdata('./data/SGA-2020.fits', 1)
     cat_ra = sga['ra']
     cat_dec = sga['dec']
     cat_z = sga['Z_LEDA']
