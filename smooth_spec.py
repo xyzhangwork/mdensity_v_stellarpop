@@ -1,8 +1,7 @@
 import astropy.io.fits as fits
 import numpy as np
 import astropy.constants
-from smoothing import smoothspec
-import sys
+from sedpy.smoothing import smoothspec
 
 if __name__ == '__main__':
     smoothed_spec = fits.open('./data/stacked_sigfix_mask.fits')
