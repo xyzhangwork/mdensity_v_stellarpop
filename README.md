@@ -27,6 +27,8 @@ This repository contains the scripts to conduct the analysis and generate the fi
 	    _product: ./data/smiles_ssp/*_  
 12. construct input spectra for alf fitting: make_spec.py  
 	    _product: ./data/alf/*_
+----------------------------------------------------------
+
 other scripts: 
 	mclrs.py: collection of several Mass-to-Light-ratio-to-Color Relations 
 	calc_kcor.py: k-correction code
