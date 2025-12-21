@@ -1,6 +1,6 @@
 # mdensity_v_stellarpop
 
-This repository contains the scripts to conduct the analysis and generate the figures in Zhang et al. 2025 (arxiv: 2507.22602)
+This repository contains the scripts to conduct the analysis and generate the figures in [Zhang et al. 2025](https://arxiv.org/pdf/2507.22602)
 
 ## Analysis Pipeline:
 1. Cross-match between MaNGA and SGA catalogs: match_manga.py; 
